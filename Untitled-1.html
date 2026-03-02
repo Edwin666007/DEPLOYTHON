@@ -1,0 +1,370 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Binary Brains | AI × CyberSec HQ</title>
+    <link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@400;600;700&family=Space+Grotesk:wght@300;400;700&display=swap" rel="stylesheet">
+    <style>
+        /* =========================================
+           CSS STYLES (Module: Design & UI/UX)
+           ========================================= */
+        :root {
+            --bg-color: #05050f;
+            --text-color: #ffffff;
+            --primary: #7e22ce; /* Cyber Purple */
+            --secondary: #0ea5e9; /* Hologram Blue */
+            --glass: rgba(255, 255, 255, 0.05);
+            --border: rgba(255, 255, 255, 0.1);
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Space Grotesk', sans-serif; }
+        body { background-color: var(--bg-color); color: var(--text-color); overflow-x: hidden; }
+        
+        /* Background Canvas */
+        #particle-canvas { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; z-index: -1; opacity: 0.6; }
+
+        /* Typography */
+        h1, h2, h3, .logo { font-family: 'Rajdhani', sans-serif; }
+        .neon-text { color: var(--secondary); text-shadow: 0 0 10px var(--secondary); }
+        .gradient-text { background: linear-gradient(90deg, var(--primary), var(--secondary)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+
+        /* Navigation */
+        nav { display: flex; justify-content: space-between; align-items: center; padding: 1.5rem 5%; background: rgba(5, 5, 15, 0.8); backdrop-filter: blur(15px); border-bottom: 1px solid var(--border); position: fixed; width: 100%; top: 0; z-index: 100; }
+        .logo { font-size: 2rem; font-weight: 700; letter-spacing: 2px; cursor: pointer;}
+        .nav-links { display: flex; gap: 2rem; list-style: none; }
+        .nav-links li { cursor: pointer; color: #aaa; transition: 0.3s; font-weight: 600; text-transform: uppercase; font-size: 0.9rem;}
+        .nav-links li:hover, .nav-links li.active { color: #fff; text-shadow: 0 0 8px var(--secondary); }
+        .user-profile-btn { width: 40px; height: 40px; border-radius: 50%; background: var(--primary); display: flex; align-items: center; justify-content: center; font-weight: bold; cursor: pointer; border: 2px solid var(--secondary); }
+
+        /* Main Container for SPA */
+        .section-container { display: none; padding: 100px 5% 50px; min-height: 100vh; animation: fadeIn 0.5s ease-in-out; }
+        .section-container.active { display: block; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+
+        /* Reusable Glass Cards */
+        .glass-card { background: var(--glass); border: 1px solid var(--border); border-radius: 15px; padding: 2rem; backdrop-filter: blur(10px); transition: 0.3s; }
+        .glass-card:hover { border-color: var(--secondary); box-shadow: 0 0 20px rgba(14, 165, 233, 0.2); }
+
+        /* --- MODULE 1: HERO --- */
+        #hero { display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; height: 100vh; }
+        .glitch-title { font-size: 5rem; font-weight: 700; margin-bottom: 1rem; text-transform: uppercase; letter-spacing: 2px; }
+        .hero-tagline { font-size: 1.2rem; color: #aaa; max-width: 600px; margin-bottom: 2rem; }
+        .btn-primary { background: var(--secondary); color: #fff; padding: 1rem 2.5rem; border: none; border-radius: 30px; font-size: 1.1rem; font-weight: bold; cursor: pointer; transition: 0.3s; box-shadow: 0 0 15px rgba(14, 165, 233, 0.5); }
+        .btn-primary:hover { transform: scale(1.05); box-shadow: 0 0 30px rgba(14, 165, 233, 0.8); }
+        .ticker-wrap { width: 80%; background: rgba(126, 34, 206, 0.2); border: 1px solid var(--primary); border-radius: 8px; padding: 10px; display: flex; align-items: center; margin-top: 3rem; }
+        .ticker-wrap span { color: var(--primary); font-weight: bold; margin-right: 15px; white-space: nowrap; }
+
+        /* --- MODULE 2: EVENTS --- */
+        .events-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 2rem; margin-top: 2rem; }
+        .event-date { color: var(--secondary); font-weight: bold; font-family: 'Rajdhani'; font-size: 1.5rem; }
+        .event-btn { margin-top: 1.5rem; padding: 0.5rem 1rem; background: transparent; border: 1px solid var(--text-color); color: #fff; border-radius: 5px; cursor: pointer; transition: 0.3s;}
+        .event-btn:hover { background: var(--text-color); color: var(--bg-color); }
+
+        /* --- MODULE 3: TEAMS --- */
+        .team-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 2rem; margin-top: 2rem; text-align: center; }
+        .avatar { width: 80px; height: 80px; border-radius: 50%; background: linear-gradient(45deg, var(--primary), var(--secondary)); margin: 0 auto 1rem; display: flex; align-items: center; justify-content: center; font-size: 2rem; font-weight: bold; font-family: 'Rajdhani'; }
+        .role { font-size: 0.8rem; padding: 5px 10px; border-radius: 12px; border: 1px solid var(--primary); color: #d8b4fe; background: rgba(126, 34, 206, 0.1); display: inline-block; margin-bottom: 1rem; }
+        .tech-stack span { font-size: 0.75rem; background: rgba(255,255,255,0.1); padding: 3px 8px; border-radius: 4px; margin: 2px; display: inline-block;}
+
+        /* --- MODULE 4: LEADERBOARD --- */
+        .leaderboard-table { width: 100%; border-collapse: collapse; margin-top: 2rem; background: var(--glass); border-radius: 15px; overflow: hidden; }
+        .leaderboard-table th, .leaderboard-table td { padding: 1rem; text-align: left; border-bottom: 1px solid var(--border); }
+        .leaderboard-table th { background: rgba(14, 165, 233, 0.1); color: var(--secondary); font-family: 'Rajdhani'; font-size: 1.2rem; }
+        .leaderboard-table tr:hover { background: rgba(255,255,255,0.05); }
+        .rank-1 { color: gold; font-weight: bold; text-shadow: 0 0 5px gold; }
+
+        /* --- MODULE 5: FEED --- */
+        .feed-container { max-width: 800px; margin: 0 auto; }
+        .post-box { background: var(--glass); padding: 1.5rem; border-radius: 15px; margin-bottom: 2rem; border: 1px solid var(--border); }
+        .post-input { width: 100%; background: transparent; border: none; border-bottom: 1px solid var(--border); color: #fff; padding: 10px; font-size: 1rem; margin-bottom: 1rem; outline: none; resize: none; }
+        .post-btn { background: var(--primary); border: none; padding: 8px 20px; color: #fff; border-radius: 5px; cursor: pointer; float: right; }
+        .feed-post { background: rgba(0,0,0,0.3); padding: 1.5rem; border-radius: 10px; margin-top: 1.5rem; border-left: 3px solid var(--secondary); }
+        .post-author { font-weight: bold; color: var(--secondary); margin-bottom: 5px; }
+
+        /* --- MODULE 6: PROFILE --- */
+        .profile-header { display: flex; align-items: center; gap: 2rem; margin-bottom: 3rem; padding: 2rem; background: var(--glass); border-radius: 15px; }
+        .profile-avatar { width: 120px; height: 120px; font-size: 4rem; border: 3px solid var(--secondary); }
+        .profile-stats { display: flex; gap: 2rem; margin-top: 1rem; }
+        .stat-box { text-align: center; }
+        .stat-num { font-size: 2rem; font-weight: bold; color: var(--secondary); font-family: 'Rajdhani'; }
+        
+        /* Layout Utilities */
+        .section-title { font-size: 2.5rem; margin-bottom: 1rem; border-bottom: 2px solid var(--border); padding-bottom: 10px; display: inline-block;}
+    </style>
+</head>
+<body>
+
+    <canvas id="particle-canvas"></canvas>
+
+    <nav>
+        <div class="logo" onclick="switchTab('hero')">BINARY <span class="neon-text">BRAINS</span></div>
+        <ul class="nav-links">
+            <li onclick="switchTab('hero')" class="active" data-target="hero">Home</li>
+            <li onclick="switchTab('events')" data-target="events">Events</li>
+            <li onclick="switchTab('teams')" data-target="teams">The Crew</li>
+            <li onclick="switchTab('leaderboard')" data-target="leaderboard">Leaderboard</li>
+            <li onclick="switchTab('feed')" data-target="feed">Community</li>
+        </ul>
+        <div class="user-profile-btn" onclick="switchTab('profile')" title="My Profile">A</div>
+    </nav>
+
+    <section id="hero" class="section-container active">
+        <h1 class="glitch-title">AI × <span class="gradient-text">CyberSecurity</span> HQ</h1>
+        <p class="hero-tagline">Building the future of secure intelligence. Join the Binary Brains ecosystem to manage events, teams, and knowledge in one unified digital fortress.</p>
+        <button class="btn-primary" onclick="switchTab('events')">Initialize System</button>
+        
+        <div class="ticker-wrap">
+            <span>🔴 SYSTEM ALERTS:</span>
+            <marquee scrollamount="6" style="color:#ccc;">Deployathon 2026 Live! | New Quantum Cryptography Module Added | Team Binary Brains leading the charts! | Zero-day vulnerability patched in Sector 4.</marquee>
+        </div>
+    </section>
+
+    <section id="events" class="section-container">
+        <h2 class="section-title">Operations & <span class="neon-text">Events</span></h2>
+        <div class="events-grid">
+            <div class="glass-card">
+                <div class="event-date">MAR 15 - 16</div>
+                <h3 style="margin: 10px 0;">Deployathon 2026</h3>
+                <p style="color: #aaa; font-size: 0.9rem;">Web Development Challenge at SRM Madurai. Build the ultimate AI web ecosystem.</p>
+                <button class="event-btn">Registered</button>
+            </div>
+            <div class="glass-card">
+                <div class="event-date">APR 02</div>
+                <h3 style="margin: 10px 0;">Capture The Flag (CTF) V2</h3>
+                <p style="color: #aaa; font-size: 0.9rem;">Reverse engineering, cryptography, and web exploitation challenges.</p>
+                <button class="event-btn">Register Team</button>
+            </div>
+            <div class="glass-card">
+                <div class="event-date">APR 20</div>
+                <h3 style="margin: 10px 0;">Quantum Tech Summit</h3>
+                <p style="color: #aaa; font-size: 0.9rem;">Deep dive into quantum computing architectures and their impact on modern security.</p>
+                <button class="event-btn">Join Waitlist</button>
+            </div>
+        </div>
+    </section>
+
+    <section id="teams" class="section-container">
+        <h2 class="section-title">Team <span class="gradient-text">Binary Brains</span></h2>
+        <div class="team-grid">
+            <div class="glass-card">
+                <div class="avatar">Y</div>
+                <div class="role">AI Developer</div>
+                <h3>Yasira M</h3>
+                <p style="font-size: 0.85rem; color: #aaa; margin: 10px 0;">Focused on solving real-world problems using AI and deep learning.</p>
+                <div class="tech-stack"><span>Python</span><span>TensorFlow</span><span>NLP</span></div>
+            </div>
+            <div class="glass-card">
+                <div class="avatar" style="background: linear-gradient(45deg, #ef4444, #f97316);">V</div>
+                <div class="role" style="border-color:#ef4444; color:#fca5a5; background:rgba(239,68,68,0.1);">CyberSec Lead</div>
+                <h3>Vijay V</h3>
+                <p style="font-size: 0.85rem; color: #aaa; margin: 10px 0;">Securing infrastructures and ethical hacking specialist.</p>
+                <div class="tech-stack"><span>Kali Linux</span><span>Metasploit</span><span>Burp</span></div>
+            </div>
+            <div class="glass-card">
+                <div class="avatar" style="background: linear-gradient(45deg, #10b981, #3b82f6);">K</div>
+                <div class="role" style="border-color:#10b981; color:#6ee7b7; background:rgba(16,185,129,0.1);">Full Stack Dev</div>
+                <h3>Kaviyarasu R</h3>
+                <p style="font-size: 0.85rem; color: #aaa; margin: 10px 0;">Architecting scalable backend systems and flawless UIs.</p>
+                <div class="tech-stack"><span>React</span><span>Node.js</span><span>MongoDB</span></div>
+            </div>
+            <div class="glass-card">
+                <div class="avatar" style="background: linear-gradient(45deg, #f59e0b, #ef4444);">A</div>
+                <div class="role" style="border-color:#f59e0b; color:#fcd34d; background:rgba(245,158,11,0.1);">Quantum & HCI Arch</div>
+                <h3>Anbu</h3>
+                <p style="font-size: 0.85rem; color: #aaa; margin: 10px 0;">Exploring Quantum Tech (QUANTRA) & Contactless Gestures (Bhoomi).</p>
+                <div class="tech-stack"><span>Qiskit</span><span>OpenCV</span><span>System Arch</span></div>
+            </div>
+        </div>
+    </section>
+
+    <section id="leaderboard" class="section-container">
+        <h2 class="section-title">Global <span class="neon-text">Rankings</span></h2>
+        <table class="leaderboard-table">
+            <thead>
+                <tr>
+                    <th>Rank</th>
+                    <th>Team Name</th>
+                    <th>Badges</th>
+                    <th>Points</th>
+                    <th>Status</th>
+                </tr>
+            </thead>
+            <tbody id="leaderboard-body">
+                </tbody>
+        </table>
+    </section>
+
+    <section id="feed" class="section-container">
+        <div class="feed-container">
+            <h2 class="section-title">Comms <span class="gradient-text">Link</span></h2>
+            
+            <div class="post-box">
+                <textarea class="post-input" rows="3" placeholder="Share an exploit, project idea, or code snippet..."></textarea>
+                <div style="overflow: hidden;">
+                    <button class="post-btn">Transmit Data</button>
+                </div>
+            </div>
+
+            <div id="feed-stream">
+                <div class="feed-post">
+                    <div class="post-author">@Anbu_Dev</div>
+                    <p>Just integrated a new hand-gesture recognition module into the Bhoomi project. Contactless HCI is definitely the future for secure sterile environments! 🚀</p>
+                    <div style="margin-top: 10px; font-size: 0.8rem; color: #aaa;">❤️ 24 Likes • 💬 5 Comments</div>
+                </div>
+                <div class="feed-post">
+                    <div class="post-author">@Yasira_AI</div>
+                    <p>Training a new anomaly detection model for the upcoming CTF network traffic logs. The loss function is stabilizing beautifully.</p>
+                    <div style="margin-top: 10px; font-size: 0.8rem; color: #aaa;">❤️ 18 Likes • 💬 2 Comments</div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section id="profile" class="section-container">
+        <div class="profile-header">
+            <div class="avatar profile-avatar" style="background: linear-gradient(45deg, #f59e0b, #ef4444); margin:0;">A</div>
+            <div>
+                <h2 style="font-size: 2.5rem; margin-bottom: 5px;">Anbu</h2>
+                <div class="role" style="border-color:#f59e0b; color:#fcd34d; background:rgba(245,158,11,0.1);">Quantum & HCI Architect</div>
+                <p style="color: #aaa; margin-top: 10px; max-width: 500px;">B.Tech IT Student @ SRM Madurai. Passionate about Quantum Computing, AI, and Chess. Currently developing 'Bhoomi' (Contactless HCI) and 'QUANTRA'.</p>
+            </div>
+        </div>
+
+        <h3 class="neon-text" style="font-size: 1.5rem; margin-bottom: 1rem;">Stats & Activity</h3>
+        <div class="glass-card profile-stats">
+            <div class="stat-box">
+                <div class="stat-num">4,250</div>
+                <div style="color: #aaa; font-size: 0.9rem;">Reputation Points</div>
+            </div>
+            <div class="stat-box">
+                <div class="stat-num">12</div>
+                <div style="color: #aaa; font-size: 0.9rem;">CTFs Completed</div>
+            </div>
+            <div class="stat-box">
+                <div class="stat-num">🥇</div>
+                <div style="color: #aaa; font-size: 0.9rem;">Current Rank</div>
+            </div>
+        </div>
+    </section>
+
+    <script>
+        // 1. Single Page Application (SPA) Tab Switching Logic
+        function switchTab(tabId) {
+            // Hide all sections
+            document.querySelectorAll('.section-container').forEach(sec => {
+                sec.classList.remove('active');
+            });
+            // Show target section
+            document.getElementById(tabId).classList.add('active');
+
+            // Update Nav styling
+            document.querySelectorAll('.nav-links li').forEach(li => {
+                li.classList.remove('active');
+            });
+            let activeLink = document.querySelector(`.nav-links li[data-target="${tabId}"]`);
+            if(activeLink) activeLink.classList.add('active');
+            
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        // 2. Generate Dummy Leaderboard Data dynamically 
+        // (If you want 20,000 lines, you can expand this array or generate 5000 rows in a loop!)
+        const leaderboardData = [
+            { rank: 1, name: "Binary Brains", badges: "🔥 🛡️ 🧠", points: 4250, status: "Active" },
+            { rank: 2, name: "Cyber Knights", badges: "🛡️ ⚡", points: 3980, status: "Active" },
+            { rank: 3, name: "Neural Ninjas", badges: "🧠 ⚡", points: 3850, status: "Active" },
+            { rank: 4, name: "Root Access", badges: "💻", points: 3420, status: "Offline" },
+            { rank: 5, name: "Quantum Phantoms", badges: "🌌 🛡️", points: 3100, status: "Active" }
+        ];
+
+        const tbody = document.getElementById('leaderboard-body');
+        leaderboardData.forEach(team => {
+            let tr = document.createElement('tr');
+            let rankClass = team.rank === 1 ? 'class="rank-1"' : '';
+            tr.innerHTML = `
+                <td ${rankClass}>#${team.rank}</td>
+                <td style="font-weight:bold;">${team.name}</td>
+                <td>${team.badges}</td>
+                <td style="color:var(--secondary); font-family:'Rajdhani'; font-weight:bold;">${team.points} XP</td>
+                <td><span style="color: ${team.status === 'Active' ? '#10b981' : '#aaa'}">${team.status}</span></td>
+            `;
+            tbody.appendChild(tr);
+        });
+
+        // 3. 3D Tilt Effect for Glass Cards
+        document.querySelectorAll('.glass-card').forEach(card => {
+            card.addEventListener('mousemove', e => {
+                let rect = card.getBoundingClientRect();
+                let x = e.clientX - rect.left;
+                let y = e.clientY - rect.top;
+                let rotateX = ((y - rect.height / 2) / (rect.height / 2)) * -5;
+                let rotateY = ((x - rect.width / 2) / (rect.width / 2)) * 5;
+                card.style.transform = `perspective(1000px) rotateX(${rotateX}deg) rotateY(${rotateY}deg) scale3d(1.02, 1.02, 1.02)`;
+            });
+            card.addEventListener('mouseleave', () => {
+                card.style.transform = 'perspective(1000px) rotateX(0deg) rotateY(0deg) scale3d(1, 1, 1)';
+            });
+        });
+
+        // 4. Particle Background Canvas Logic
+        const canvas = document.getElementById("particle-canvas");
+        const ctx = canvas.getContext("2d");
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+
+        let particlesArray = [];
+        class Particle {
+            constructor() {
+                this.x = Math.random() * canvas.width;
+                this.y = Math.random() * canvas.height;
+                this.size = Math.random() * 2 + 0.5;
+                this.speedX = Math.random() * 1 - 0.5;
+                this.speedY = Math.random() * 1 - 0.5;
+            }
+            update() {
+                this.x += this.speedX;
+                this.y += this.speedY;
+                if (this.x > canvas.width || this.x < 0) this.speedX *= -1;
+                if (this.y > canvas.height || this.y < 0) this.speedY *= -1;
+            }
+            draw() {
+                ctx.fillStyle = '#0ea5e9';
+                ctx.beginPath();
+                ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+                ctx.fill();
+            }
+        }
+        function initParticles() {
+            particlesArray = [];
+            let count = (canvas.width * canvas.height) / 12000;
+            for (let i = 0; i < count; i++) particlesArray.push(new Particle());
+        }
+        function animateParticles() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            for (let i = 0; i < particlesArray.length; i++) {
+                particlesArray[i].update();
+                particlesArray[i].draw();
+                // Connect particles
+                for (let j = i; j < particlesArray.length; j++) {
+                    let dx = particlesArray[i].x - particlesArray[j].x;
+                    let dy = particlesArray[i].y - particlesArray[j].y;
+                    let distance = Math.sqrt(dx * dx + dy * dy);
+                    if (distance < 100) {
+                        ctx.beginPath();
+                        ctx.strokeStyle = `rgba(14, 165, 233, ${1 - distance/100})`;
+                        ctx.lineWidth = 0.5;
+                        ctx.moveTo(particlesArray[i].x, particlesArray[i].y);
+                        ctx.lineTo(particlesArray[j].x, particlesArray[j].y);
+                        ctx.stroke();
+                    }
+                }
+            }
+            requestAnimationFrame(animateParticles);
+        }
+        window.addEventListener('resize', () => { canvas.width = window.innerWidth; canvas.height = window.innerHeight; initParticles(); });
+        initParticles();
+        animateParticles();
+    </script>
+</body>
+</html>
